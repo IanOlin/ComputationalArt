@@ -34,7 +34,13 @@ def evaluate_random_function(f, x, y):
         0.02
     """
     # TODO: implement this
-    pass
+    if f == ["x"]:
+    	return x
+    elif f == ["y"]:
+    	return y
+    else:
+    	return 666
+    	#ValueError('This funciton is not a valid function')
 
 
 def remap_interval(val,
@@ -64,8 +70,9 @@ def remap_interval(val,
         >>> remap_interval(5, 4, 6, 1, 2)
         1.5
     """
-    # TODO: implement this
-    pass
+    scale = abs(float((output_interval_end - output_interval_start))/float((input_interval_start - input_interval_end)))
+    shift = (val-input_interval_start)*scale
+    return shift+output_interval_start
 
 
 def color_map(val):
@@ -143,8 +150,8 @@ if __name__ == '__main__':
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    # generate_art("myart.png")
+    generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
-    test_image("noise.png")
+    # test_image("noise.png")
