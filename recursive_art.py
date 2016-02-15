@@ -1,6 +1,6 @@
 """ TODO: Put your header comment here """
 
-import random
+import random, math
 from PIL import Image
 
 
@@ -30,14 +30,18 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # TODO: implement this
+    # TODO: implement lowest level function being any function
     choice = random.randint(0,len(functions)-1) #chooses which function to implement
 
     if(min_depth < 1): #minimum depth has been reached, will choose to end or not
     	if(random.randint(0,1)==0): #flip a coin to end
-    		return [functions[choice]] #might need to be x or y. might need to count args
+    		if(random.randint(0,1)==0): #returning only x or y to simplify evaluation
+    			return ['x']
+    		return ['y'] 
     if(max_depth == 0): #max depth reached, will end
-    	return [functions[choice]]
+    	if(random.randint(0,1)==0): #returning x or y to simplyfy evalutation
+    		return ['x']
+    	return ['y']
     if(choice<4): # go a level deeper with 2 arguments
     	return [functions[choice], build_random_function(min_depth-1, max_depth-1),build_random_function(min_depth-1,max_depth-1)]
     else: #needless else, go a level deeper with 1 argument
@@ -60,12 +64,40 @@ def evaluate_random_function(f, x, y):
         0.02
     """
     # TODO: implement this
-    if f[0] == 'x': #function is x, returns x out of (x,y)
-    	return x
-    elif f[0] == 'y': #function is y, returns y ouot of (x,y)
-    	return y
-    else:
-    	ValueError('This funciton is not a valid function')
+    if len(f) == 1: #end case
+	    if f[0] == 'x': #function is x, returns x out of (x,y)
+	    	return x
+	    elif f[0] == 'y': #function is y, returns y ouot of (x,y)
+	    	return y
+	    else:
+	    	ValueError('This funciton is not a valid function')
+
+    if f[0] == 'prod':
+        X = evaluate_random_function(f[1],x,y)
+        Y = evaluate_random_function(f[2],x,y)        
+        return X*Y
+    if f[0] == 'avg':
+        X = evaluate_random_function(f[1],x,y)
+        Y = evaluate_random_function(f[2],x,y) 
+        return .5*(X+Y)
+    if f[0] == 'x':
+        X = evaluate_random_function(f[1],x,y)
+        return X
+    if f[0] == 'y':
+        Y = evaluate_random_function(f[2],x,y) 
+        return Y
+    if f[0] == 'cos_pi':
+        X = evaluate_random_function(f[1],x,y)
+        return math.cos(math.pi * X)
+    if f[0] == 'sin_pi':
+        X = evaluate_random_function(f[1],x,y)
+        return math.sin(math.pi * X)
+    if f[0] == 'half':
+        X = evaluate_random_function(f[1],x,y)
+        return .5*X
+    if f[0] == 'invt':
+        X = evaluate_random_function(f[1],x,y) 
+        return -1*X
 
 
 def remap_interval(val,
@@ -171,12 +203,12 @@ def generate_art(filename, x_size=350, y_size=350):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-    print(build_random_function(7,9))
+    #print(build_random_function(7,9))
 
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    #generate_art("myart.png")
+    generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
