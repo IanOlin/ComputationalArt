@@ -4,6 +4,21 @@ import random
 from PIL import Image
 
 
+
+functions = ['prod', 'avg', 'x', 'y', 'cos_pi', 'sin_pi', 'invt', 'half']
+'''
+These are the functions that build random funciton can choose from
+prod(q,w) = qw
+avg(q,w) = .5(q+w)
+x(q,w) = q
+y(q,w) = w
+cos_pi(q) = cos(pi*q)
+sin_pi(q) = sin(pi*q)
+invt(q) = -q
+half(q) = .5q
+'''
+
+
 def build_random_function(min_depth, max_depth):
     """ Builds a random function of depth at least min_depth and depth
         at most max_depth (see assignment writeup for definition of depth
@@ -11,12 +26,23 @@ def build_random_function(min_depth, max_depth):
 
         min_depth: the minimum depth of the random function
         max_depth: the maximum depth of the random function
-        returns: the randomly generated function represented as a nested list
+        returns: the randomly generated function represented' as a nested list
                  (see assignment writeup for details on the representation of
                  these functions)
     """
     # TODO: implement this
-    pass
+    choice = random.randint(0,len(functions)-1) #chooses which function to implement
+
+    if(min_depth < 1): #minimum depth has been reached, will choose to end or not
+    	if(random.randint(0,1)==0): #flip a coin to end
+    		return [functions[choice]] #might need to be x or y. might need to count args
+    if(max_depth == 0): #max depth reached, will end
+    	return [functions[choice]]
+    if(choice<4): # go a level deeper with 2 arguments
+    	return [functions[choice], build_random_function(min_depth-1, max_depth-1),build_random_function(min_depth-1,max_depth-1)]
+    else: #needless else, go a level deeper with 1 argument
+    	return [functions[choice], build_random_function(min_depth-1, max_depth-1)]
+
 
 
 def evaluate_random_function(f, x, y):
@@ -34,13 +60,12 @@ def evaluate_random_function(f, x, y):
         0.02
     """
     # TODO: implement this
-    if f == ["x"]:
+    if f[0] == 'x': #function is x, returns x out of (x,y)
     	return x
-    elif f == ["y"]:
+    elif f[0] == 'y': #function is y, returns y ouot of (x,y)
     	return y
     else:
-    	return 666
-    	#ValueError('This funciton is not a valid function')
+    	ValueError('This funciton is not a valid function')
 
 
 def remap_interval(val,
@@ -123,9 +148,9 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = ["x"]
-    green_function = ["y"]
-    blue_function = ["x"]
+    red_function = build_random_function(7, 9)
+    green_function = build_random_function(7, 9)
+    blue_function = build_random_function(7, 9)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -146,11 +171,12 @@ def generate_art(filename, x_size=350, y_size=350):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+    print(build_random_function(7,9))
 
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    generate_art("myart.png")
+    #generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
