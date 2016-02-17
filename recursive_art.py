@@ -63,7 +63,7 @@ def evaluate_random_function(f, x, y):
         >>> evaluate_random_function(["y"],0.1,0.02)
         0.02
     """
-    # TODO: implement this
+    # TODO: implement lowest level function being any function
     if len(f) == 1: #end case
 	    if f[0] == 'x': #function is x, returns x out of (x,y)
 	    	return x
@@ -71,6 +71,8 @@ def evaluate_random_function(f, x, y):
 	    	return y
 	    else:
 	    	ValueError('This funciton is not a valid function')
+
+    # Definitions of all random functions:
 
     if f[0] == 'prod':
         X = evaluate_random_function(f[1],x,y)
