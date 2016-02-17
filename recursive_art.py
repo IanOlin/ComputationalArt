@@ -1,4 +1,8 @@
-""" TODO: Put your header comment here """
+""" 
+Ian Paul
+Computational Art Project
+Softdes 2016
+"""
 
 import random, math
 from PIL import Image
