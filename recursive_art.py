@@ -4,8 +4,18 @@ import random, math
 from PIL import Image
 
 
+#functions in lambda form
+prod = lambda q, w: q * w
+avg = lambda q, w : .5 * (q + w)
+x = lambda q, w: q
+y = lambda q, w: w
+cos_pi = lambda q: math.cos(math.pi * q)
+sin_pi = lambda q: math.sin(math.pi * q)
+invt = lambda q: -q
+half = lambda q: .5 * q
 
-functions = ['prod', 'avg', 'x', 'y', 'cos_pi', 'sin_pi', 'invt', 'half']
+functions = [prod, avg, x, y, cos_pi, sin_pi, invt, half]
+two_args = [prod, avg, x, y]
 '''
 These are the functions that build random funciton can choose from
 prod(q,w) = qw
@@ -30,76 +40,27 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # TODO: implement lowest level function being any function
-    choice = random.randint(0,len(functions)-1) #chooses which function to implement
-
-    if(min_depth < 1): #minimum depth has been reached, will choose to end or not
-    	if(random.randint(0,1)==0): #flip a coin to end
-    		if(random.randint(0,1)==0): #returning only x or y to simplify evaluation
-    			return ['x']
-    		return ['y'] 
-    if(max_depth == 0): #max depth reached, will end
-    	if(random.randint(0,1)==0): #returning x or y to simplyfy evalutation
-    		return ['x']
-    	return ['y']
-    if(choice<4): # go a level deeper with 2 arguments
-    	return [functions[choice], build_random_function(min_depth-1, max_depth-1),build_random_function(min_depth-1,max_depth-1)]
-    else: #needless else, go a level deeper with 1 argument
-    	return [functions[choice], build_random_function(min_depth-1, max_depth-1)]
+    choice = random.choice(functions) #chooses which function to implement
 
 
+    #decision to end
 
-def evaluate_random_function(f, x, y):
-    """ Evaluate the random function f with inputs x,y
-        Representation of the function f is defined in the assignment writeup
+    if min_depth < 1: #minimum depth has been reached, will choose to end or not
+    	if random.choice([True, False]): #flip a coin to end
+    		return random.choice([x,y]) #returning only x or y to simplify evaluation
+    if max_depth == 0 : #max depth reached, will end
+        return random.choice([x,y])#returning x or y to simplyfy evalutation
 
-        f: the function to evaluate
-        x: the value of x to be used to evaluate the function
-        y: the value of y to be used to evaluate the function
-        returns: the function value
+    #Recursion to generate functions
 
-        >>> evaluate_random_function(["x"],-0.5, 0.75)
-        -0.5
-        >>> evaluate_random_function(["y"],0.1,0.02)
-        0.02
-    """
-    # TODO: implement lowest level function being any function
-    if len(f) == 1: #end case
-	    if f[0] == 'x': #function is x, returns x out of (x,y)
-	    	return x
-	    elif f[0] == 'y': #function is y, returns y ouot of (x,y)
-	    	return y
-	    else:
-	    	ValueError('This funciton is not a valid function')
-
-    # Definitions of all random functions:
-
-    if f[0] == 'prod':
-        X = evaluate_random_function(f[1],x,y)
-        Y = evaluate_random_function(f[2],x,y)        
-        return X*Y
-    if f[0] == 'avg':
-        X = evaluate_random_function(f[1],x,y)
-        Y = evaluate_random_function(f[2],x,y) 
-        return .5*(X+Y)
-    if f[0] == 'x':
-        X = evaluate_random_function(f[1],x,y)
-        return X
-    if f[0] == 'y':
-        Y = evaluate_random_function(f[2],x,y) 
-        return Y
-    if f[0] == 'cos_pi':
-        X = evaluate_random_function(f[1],x,y)
-        return math.cos(math.pi * X)
-    if f[0] == 'sin_pi':
-        X = evaluate_random_function(f[1],x,y)
-        return math.sin(math.pi * X)
-    if f[0] == 'half':
-        X = evaluate_random_function(f[1],x,y)
-        return .5*X
-    if f[0] == 'invt':
-        X = evaluate_random_function(f[1],x,y) 
-        return -1*X
+    if choice in two_args: #no longer returns list
+        function1 = build_random_function(min_depth-1, max_depth-1)
+        function2 = build_random_function(min_depth-1, max_depth-1)
+    	res_function = lambda q, w: choice(function1(q,w), function2(q,w))
+    else: #only one argument
+    	function1 = build_random_function(min_depth-1, max_depth-1)
+        res_function = lambda q, w: choice(function1(q, w))
+    return res_function
 
 
 def remap_interval(val,
@@ -154,27 +115,6 @@ def color_map(val):
     color_code = remap_interval(val, -1, 1, 0, 255)
     return int(color_code)
 
-
-def test_image(filename, x_size=350, y_size=350):
-    """ Generate test image with random pixels and save as an image file.
-
-        filename: string filename for image (should be .png)
-        x_size, y_size: optional args to set image dimensions (default: 350)
-    """
-    # Create image and loop over all pixels
-    im = Image.new("RGB", (x_size, y_size))
-    pixels = im.load()
-    for i in range(x_size):
-        for j in range(y_size):
-            x = remap_interval(i, 0, x_size, -1, 1)
-            y = remap_interval(j, 0, y_size, -1, 1)
-            pixels[i, j] = (random.randint(0, 255),  # Red channel
-                            random.randint(0, 255),  # Green channel
-                            random.randint(0, 255))  # Blue channel
-
-    im.save(filename)
-
-
 def generate_art(filename, x_size=350, y_size=350):
     """ Generate computational art and save as an image file.
 
@@ -194,12 +134,15 @@ def generate_art(filename, x_size=350, y_size=350):
             x = remap_interval(i, 0, x_size, -1, 1)
             y = remap_interval(j, 0, y_size, -1, 1)
             pixels[i, j] = (
-                    color_map(evaluate_random_function(red_function, x, y)),
-                    color_map(evaluate_random_function(green_function, x, y)),
-                    color_map(evaluate_random_function(blue_function, x, y))
+                    color_map(red_function(x, y)),
+                    color_map(green_function(x, y)),
+                    color_map(blue_function(x, y))
                     )
-
     im.save(filename)
+
+def generate_bulk_art(basename,number):
+    for i in range(number):
+        generate_art(basename + str(i) + '.png')
 
 
 if __name__ == '__main__':
@@ -210,8 +153,6 @@ if __name__ == '__main__':
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    generate_art("myart.png")
+    #generate_art("myart.png")
+    generate_bulk_art('bulklambda',3)
 
-    # Test that PIL is installed correctly
-    # TODO: Comment or remove this function call after testing PIL install
-    # test_image("noise.png")
