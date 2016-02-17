@@ -36,9 +36,7 @@ def build_random_function(min_depth, max_depth):
 
         min_depth: the minimum depth of the random function
         max_depth: the maximum depth of the random function
-        returns: the randomly generated function represented' as a nested list
-                 (see assignment writeup for details on the representation of
-                 these functions)
+        returns: The evaluation of a randomly generated function
     """
     choice = random.choice(functions) #chooses which function to implement
 
@@ -53,13 +51,14 @@ def build_random_function(min_depth, max_depth):
 
     #Recursion to generate functions
 
-    if choice in two_args: #no longer returns list
+    if choice in two_args: #if the chosen function takes two arguments
         function1 = build_random_function(min_depth-1, max_depth-1)
         function2 = build_random_function(min_depth-1, max_depth-1)
     	res_function = lambda q, w: choice(function1(q,w), function2(q,w))
     else: #only one argument
     	function1 = build_random_function(min_depth-1, max_depth-1)
         res_function = lambda q, w: choice(function1(q, w))
+
     return res_function
 
 
@@ -91,7 +90,9 @@ def remap_interval(val,
         1.5
     """
     scale = abs(float((output_interval_end - output_interval_start))/float((input_interval_start - input_interval_end)))
+    #find the scaling between the two intervals
     shift = (val-input_interval_start)*scale
+    #find the ofset between the two intervals
     return shift+output_interval_start
 
 
@@ -141,18 +142,19 @@ def generate_art(filename, x_size=350, y_size=350):
     im.save(filename)
 
 def generate_bulk_art(basename,number):
+    """
+    Generate a bulk set of computational art and save them as .pngs.
+
+    basename: a string that will have a number appended to it (title of set)
+    number: number of pieces to generate
+    """
     for i in range(number):
-        generate_art(basename + str(i) + '.png')
+        generate_art(basename + str(i) + '.png',1920,1080)
 
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-    #print(build_random_function(7,9))
 
-    # Create some computational art!
-    # TODO: Un-comment the generate_art function call after you
-    #       implement remap_interval and evaluate_random_function
-    #generate_art("myart.png")
-    generate_bulk_art('bulklambda',3)
+    generate_bulk_art('bulklambda_big_1',1)
 
