@@ -9,17 +9,18 @@ from PIL import Image
 
 
 #functions in lambda form
-prod = lambda q, w: q * w
-avg = lambda q, w : .5 * (q + w)
-x = lambda q, w: q
-y = lambda q, w: w
-cos_pi = lambda q: math.cos(math.pi * q)
-sin_pi = lambda q: math.sin(math.pi * q)
-invt = lambda q: -q
-half = lambda q: .5 * q
+prod = lambda q, w, t: q * w
+avg = lambda q, w, t : .5 * (q + w)
+x = lambda q, w, t: q
+y = lambda q, w, t: w
+cos_pi = lambda q, t: math.cos(math.pi * q)
+sin_pi = lambda q, t: math.sin(math.pi * q)
+invt = lambda q, t: -q
+half = lambda q, t: .5 * q
+timef = lambda q, w, t: t
 
-functions = [prod, avg, x, y, cos_pi, sin_pi, invt, half]
-two_args = [prod, avg, x, y]
+functions = [prod, avg, x, y, cos_pi, sin_pi, invt, half, timef]
+two_args = [prod, avg, x, y, timef]
 '''
 These are the functions that build random funciton can choose from
 prod(q,w) = qw
@@ -49,19 +50,19 @@ def build_random_function(min_depth, max_depth):
 
     if min_depth < 1: #minimum depth has been reached, will choose to end or not
     	if random.choice([True, False]): #flip a coin to end
-    		return random.choice([x,y]) #returning only x or y to simplify evaluation
+    		return random.choice([x,y, timef]) #returning only x or y to simplify evaluation
     if max_depth == 0 : #max depth reached, will end
-        return random.choice([x,y])#returning x or y to simplyfy evalutation
+        return random.choice([x, y, timef])#returning x or y to simplyfy evalutation
 
     #Recursion to generate functions
 
     if choice in two_args: #if the chosen function takes two arguments
         function1 = build_random_function(min_depth-1, max_depth-1)
         function2 = build_random_function(min_depth-1, max_depth-1)
-    	res_function = lambda q, w: choice(function1(q,w), function2(q,w))
+    	res_function = lambda q, w, t : choice(function1(q, w, t), function2(q, w, t))
     else: #only one argument
     	function1 = build_random_function(min_depth-1, max_depth-1)
-        res_function = lambda q, w: choice(function1(q, w))
+        res_function = lambda q, w, t: choice(function1(q, w, t))
 
     return res_function
 
@@ -120,7 +121,7 @@ def color_map(val):
     color_code = remap_interval(val, -1, 1, 0, 255)
     return int(color_code)
 
-def generate_art(filename, x_size=350, y_size=350):
+def generate_art(filename, time, x_size=350, y_size=350):
     """ Generate computational art and save as an image file.
 
         filename: string filename for image (should be .png)
@@ -134,14 +135,15 @@ def generate_art(filename, x_size=350, y_size=350):
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
     pixels = im.load()
+    t = remap_interval(time, 0, movie_length, -1, 1)
     for i in range(x_size):
         for j in range(y_size):
             x = remap_interval(i, 0, x_size, -1, 1)
             y = remap_interval(j, 0, y_size, -1, 1)
             pixels[i, j] = (
-                    color_map(red_function(x, y)),
-                    color_map(green_function(x, y)),
-                    color_map(blue_function(x, y))
+                    color_map(red_function(x, y, t)),
+                    color_map(green_function(x, y, t)),
+                    color_map(blue_function(x, y, t))
                     )
     im.save(filename)
 
@@ -155,10 +157,21 @@ def generate_bulk_art(basename,number):
     for i in range(number):
         generate_art(basename + str(i) + '.png',1920,1080)
 
+def generate_movie(basename,frames):
+    """
+    Generate a bulk set of computational art and save them as .pngs.
+
+    basename: a string that will have a number appended to it (title of set)
+    frames: number of pieces to generate
+    """
+    for i in range(frames):
+        generate_art(basename + '_frame_' + str(i) + '.png',i, 400,400)
+
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    generate_bulk_art('bulklambda_big_1',1)
+    movie_length = 10
+    generate_movie('movie_test', movie_length)
 
