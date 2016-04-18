@@ -13,10 +13,10 @@ prod = lambda q, w, t: q * w
 avg = lambda q, w, t : .5 * (q + w)
 x = lambda q, w, t: q
 y = lambda q, w, t: w
-cos_pi = lambda q, t: math.cos(math.pi * q)
-sin_pi = lambda q, t: math.sin(math.pi * q)
-invt = lambda q, t: -q
-half = lambda q, t: .5 * q
+cos_pi = lambda q: math.cos(math.pi * q)
+sin_pi = lambda q: math.sin(math.pi * q)
+invt = lambda q: -q
+half = lambda q: .5 * q
 timef = lambda q, w, t: t
 
 functions = [prod, avg, x, y, cos_pi, sin_pi, invt, half, timef]
@@ -59,7 +59,7 @@ def build_random_function(min_depth, max_depth):
     if choice in two_args: #if the chosen function takes two arguments
         function1 = build_random_function(min_depth-1, max_depth-1)
         function2 = build_random_function(min_depth-1, max_depth-1)
-    	res_function = lambda q, w, t : choice(function1(q, w, t), function2(q, w, t))
+    	res_function = lambda q, w, t : choice(function1(q, w, t), function2(q, w, t), timef(q,w,t))
     else: #only one argument
     	function1 = build_random_function(min_depth-1, max_depth-1)
         res_function = lambda q, w, t: choice(function1(q, w, t))
@@ -121,7 +121,7 @@ def color_map(val):
     color_code = remap_interval(val, -1, 1, 0, 255)
     return int(color_code)
 
-def generate_art(filename, time, x_size=350, y_size=350):
+def generate_art(basename, time, x_size=350, y_size=350):
     """ Generate computational art and save as an image file.
 
         filename: string filename for image (should be .png)
@@ -135,17 +135,20 @@ def generate_art(filename, time, x_size=350, y_size=350):
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
     pixels = im.load()
-    t = remap_interval(time, 0, movie_length, -1, 1)
-    for i in range(x_size):
-        for j in range(y_size):
-            x = remap_interval(i, 0, x_size, -1, 1)
-            y = remap_interval(j, 0, y_size, -1, 1)
-            pixels[i, j] = (
-                    color_map(red_function(x, y, t)),
-                    color_map(green_function(x, y, t)),
-                    color_map(blue_function(x, y, t))
-                    )
-    im.save(filename)
+    frames = range(time)
+    for frame in frames:
+        for i in range(x_size):
+            for j in range(y_size):
+                x = remap_interval(i, 0, x_size, -1, 1)
+                y = remap_interval(j, 0, y_size, -1, 1)
+                t = remap_interval(frame, 0, time, -1, 1)
+                pixels[i, j] = (
+                        color_map(red_function(x, y, t)),
+                        color_map(green_function(x, y, t)),
+                        color_map(blue_function(x, y, t))
+                        )
+        filename = basename + '_frame_{:3d}'.format(frame) + '.png'
+        im.save(filename)
 
 def generate_bulk_art(basename,number):
     """
@@ -164,14 +167,13 @@ def generate_movie(basename,frames):
     basename: a string that will have a number appended to it (title of set)
     frames: number of pieces to generate
     """
-    for i in range(frames):
-        generate_art(basename + '_frame_' + str(i) + '.png',i, 400,400)
+    generate_art(basename,frames, 400,400)
 
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    movie_length = 10
+    movie_length = 200
     generate_movie('movie_test', movie_length)
 
